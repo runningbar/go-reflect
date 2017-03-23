@@ -29,8 +29,10 @@ npm install
 npm start
 ```
 
+then, type `http://127.0.0.1:8000` in browser to see something.
+
 **preview**
 
 ![](./preview.png)
 
-then, type `http://127.0.0.1:8000` in browser to see something.
+
