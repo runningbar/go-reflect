@@ -32,12 +32,24 @@ const ReflectTree = (props) => {
         return <TreeNode key={value.key} title={title}/>;
     };
 
+    const loadData = (e) => {
+        props.dispatch({
+            type: "reflectTree/changeDataPath",
+            payload: {
+                data: e.target.value
+            }
+        });
+    }
+
     return (
         <div>
-            <Search style={{ width: 300, marginTop: 10, marginLeft: 5 }} 
+            <Input placeholder="host:port" onPressEnter={loadData} defaultValue={props.dataPath}
+                style={{ width: "300px", marginTop: "20px", marginLeft: "5px", display: "block" }}/>
+            <Search style={{ width: 300, marginTop: 10, marginLeft: 5, display: props.displayContent }} 
             placeholder="search" 
             onChange={ (event) => {props.dispatch({type:`reflectTree/search`, payload:{data:event}});} }/>
-            <Tree expandedKeys={props.expandedKeys}
+            <Tree style={{ display: props.displayContent }}
+            expandedKeys={props.expandedKeys}
                     autoExpandParent={props.autoExpandParent}
                     onExpand={ (expandedKeys, {expanded, node}) => {props.dispatch({
                         type:`reflectTree/expand`, 

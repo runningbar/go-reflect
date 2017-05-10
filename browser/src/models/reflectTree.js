@@ -1,6 +1,6 @@
-import * as request from '../utils/request';
+import request from '../utils/request';
 
-function getData(key) {
+function getData(dataPath, key) {
     const parseData = (res) => {
         let data = null;
 
@@ -12,7 +12,7 @@ function getData(key) {
         return data;
     }
 
-    return request.default(`${request.HTTPPREFIX}query?key=${key}`)
+    return request(`${dataPath}query?key=${key}`, { credential: '' })
         .then(parseData)
         .catch(err => { console.log(err); });
 }
@@ -64,6 +64,8 @@ export default {
     namespace: "reflectTree",
 
     state: {
+        displayContent: "none",
+        dataPath: "",
         searchText: "",
         autoExpandParent: true,
         treeNodeData: [],
@@ -73,6 +75,10 @@ export default {
 
     subscriptions: {
         setup({ dispatch, history }) {
+            dispatch({
+                type: "tryFetchData",
+                payload: {}
+            });
             dispatch({
                 type: "fetchData",
                 payload: { key: "all" },
@@ -125,8 +131,47 @@ export default {
                 });
             }
         },
+        *changeDataPath({payload}, {call, put, select}) {
+            let dataPath = "http://" + payload.data + "/";
+            yield put({
+                type: "doChangeDataPath",
+                payload: {
+                    dataPath: dataPath,
+                    displayContent: "none",
+                    searchText: "",
+                    autoExpandParent: true,
+                    treeNodeData: [],
+                    expandedKeys: [],
+                    keyMap: {}
+                }
+            });
+            yield put({
+                type: "fetchData",
+                payload: {
+                    key: "all",
+                    dataPath: dataPath
+                }
+            });
+        },
+        *tryFetchData({ payload}, { call, put, select }) {
+            let hostname = window.location.hostname;
+            let dataPath = "http://" + hostname + ":12345/";
+            yield put({
+                type: "updateDataPath",
+                payload: {
+                    data: hostname + ":12345"
+                }
+            });
+            yield put({
+                type: "fetchData",
+                payload: {
+                    key: "all",
+                    dataPath: dataPath
+                }
+            });
+        },
         *fetchData({ payload }, { call, put, select }) {
-            let data = yield call(getData, payload.key);
+            let data = yield call(getData, payload.dataPath, payload.key);
             if (data != null) {
                 let dataList = yield select( state => state.reflectTree.treeNodeData);
                 let keyMap = yield select( state => state.reflectTree.keyMap );
@@ -142,11 +187,33 @@ export default {
                     type: "updateDataList",
                     payload: { data: dataList }
                 });
+                yield put({
+                    type: "updateDisplayContent",
+                    payload: {
+                        data: "block"
+                    }
+                });
             }
         },
     },
 
     reducers: {
+        doChangeDataPath( state, { payload }) {
+            return { ...state, 
+                    dataPath: payload.dataPath,
+                    displayContent: payload.displayContent, 
+                    searchText: payload.searchText,
+                    autoExpandParent: payload.autoExpandParent,
+                    treeNodeData: payload.treeNodeData,
+                    expandedKeys: payload.expandedKeys,
+                    keyMap: payload.keyMap};
+        },
+        updateDataPath( state, { payload }) {
+            return { ...state, dataPath: payload.data };
+        },
+        updateDisplayContent( state, { payload }) {
+            return { ...state, displayContent: payload.data };
+        },
         updateSearchText(state, { payload }) {
             return { ...state, searchText: payload.data }
         },

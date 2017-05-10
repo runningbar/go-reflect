@@ -1,8 +1,5 @@
 import fetch from 'dva/fetch';
 
-//export const HTTPPREFIX = "/"
-export const HTTPPREFIX = "http://127.0.0.1:12345/"
-
 function parseJSON(response) {
   return response.json();
 }
