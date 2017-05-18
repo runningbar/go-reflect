@@ -17,8 +17,8 @@ dir `browser`: browser client for showing reflect result. powered by [**dvajs**]
 run server:
 
 ```
-cd go-reflect/server
-go test -v
+cd go-reflect
+go run main.go
 ```
 
 run client:
