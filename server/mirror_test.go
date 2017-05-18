@@ -3,5 +3,5 @@ package mirror
 import "testing"
 
 func Test_mirror(t *testing.T) {
-	StartMirrorServer()
+	StartMirrorServer(61018)
 }

@@ -53,11 +53,12 @@ func createTestData() {
 }
 
 // StartMirrorServer that's all
-func StartMirrorServer() error {
-	createTestData()
-	const PORT = 12345
-	//http.Handle("/", http.FileServer(http.Dir("./static")))
-	http.HandleFunc("/query", query)
-	err := http.ListenAndServe(":"+strconv.Itoa(PORT), nil)
+func StartMirrorServer(port int) error {
+	//createTestData()
+	//const PORT = 12345
+	mux := http.NewServeMux()
+	//mux.Handle("/", http.FileServer(http.Dir("./static")))
+	mux.HandleFunc("/query", query)
+	err := http.ListenAndServe(":"+strconv.Itoa(port), mux)
 	return err
 }

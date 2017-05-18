@@ -29,13 +29,28 @@ func PutInMirror(name string, value interface{}) {
 		fmt.Printf("WARN: %s is already exists\n", name)
 		return
 	}
+
 	var v = reflect.ValueOf(value)
-	valueMap[name] = v
+	if v.IsValid() {
+		valueMap[name] = v
+	} else {
+		valueMap[name] = reflect.ValueOf(name + " is nil,can't be reflected!")
+	}
 	//mirrorMap[name] = startReflect(v, name, "", 1)
 }
 
 func startReflect(v reflect.Value, selfName string, parentName string, level int) Mirror {
 	var m = Mirror{}
+
+	if !v.IsValid() {
+		m.Key = createKey(selfName, parentName)
+		m.StaticType = "string"
+		m.Value = selfName + " is nil,can't be reflected!"
+		m.Children = nil
+		m.Name = selfName + ": " + m.Value + " [" + m.StaticType + "]"
+		return m
+	}
+
 	switch v.Kind() {
 	case reflect.Struct:
 		m = reflectStruct(v, selfName, parentName, level)
@@ -147,6 +162,12 @@ func reflectAtom(value reflect.Value, selfName string, parentName string, level 
 //inspired from https://github.com/golang/go/blob/049b89dc6f6b6f1001672dd5456197b74a97cbec/src/fmt/print.go#L845
 func getReflectValue(value reflect.Value) string {
 	var r string
+
+	/*if !value.IsValid() {
+		r = "nil"
+		return r
+	}*/
+
 	switch value.Kind() {
 	case reflect.Bool:
 		r = strconv.FormatBool(value.Bool())

@@ -1,6 +1,7 @@
 import request from '../utils/request';
 
 function getData(dataPath, key) {
+    if (dataPath == undefined) return null;
     const parseData = (res) => {
         let data = null;
 
@@ -79,10 +80,6 @@ export default {
                 type: "tryFetchData",
                 payload: {}
             });
-            dispatch({
-                type: "fetchData",
-                payload: { key: "all" },
-            });
         },
     },
 
@@ -132,11 +129,11 @@ export default {
             }
         },
         *changeDataPath({payload}, {call, put, select}) {
-            let dataPath = "http://" + payload.data + "/";
+            //let dataPath = "http://" + payload.data + "/";
             yield put({
                 type: "doChangeDataPath",
                 payload: {
-                    dataPath: dataPath,
+                    dataPath: payload.data,
                     displayContent: "none",
                     searchText: "",
                     autoExpandParent: true,
@@ -149,29 +146,29 @@ export default {
                 type: "fetchData",
                 payload: {
                     key: "all",
-                    dataPath: dataPath
                 }
             });
         },
         *tryFetchData({ payload}, { call, put, select }) {
-            let hostname = window.location.hostname;
-            let dataPath = "http://" + hostname + ":12345/";
+            let host = window.location.host;
+            //let dataPath = "http://" + hostname + ":12345/";
             yield put({
                 type: "updateDataPath",
                 payload: {
-                    data: hostname + ":12345"
+                    data: host
                 }
             });
             yield put({
                 type: "fetchData",
                 payload: {
                     key: "all",
-                    dataPath: dataPath
                 }
             });
         },
         *fetchData({ payload }, { call, put, select }) {
-            let data = yield call(getData, payload.dataPath, payload.key);
+            let dataPath = yield select( state => state.reflectTree.dataPath );
+            let data = yield call(getData, "http://"+dataPath+"/", payload.key);
+            //console.log(dataPath, data)
             if (data != null) {
                 let dataList = yield select( state => state.reflectTree.treeNodeData);
                 let keyMap = yield select( state => state.reflectTree.keyMap );
