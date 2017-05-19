@@ -24,20 +24,38 @@ var valueMap = make(map[string]reflect.Value)
 
 // PutInMirror reflect the specific variable and put in MirrorMap
 // 使用动态反射，所以现在只需要反射一层
+// 为了跟踪变量的实时变化，PutInMirror的参数必须是该变量的指针
 func PutInMirror(name string, value interface{}) {
+	//强制要求value必须是指针类型
+	var v = reflect.ValueOf(value)
+	if v.Kind() != reflect.Ptr {
+		fmt.Printf("ERROR: %s variable must be pointer type\n", name)
+		return
+	}
+
 	if _, ok := valueMap[name]; ok {
 		fmt.Printf("WARN: %s is already exists\n", name)
 		return
 	}
 
-	var v = reflect.ValueOf(value)
+	v = v.Elem()
+	//vd := v.Elem()
+	//fmt.Println("type of v:", vd.Type(), vd.Kind(), vd)
+	//fmt.Println("settability of v: ", vd.CanSet())
 	if v.IsValid() {
 		valueMap[name] = v
 	} else {
 		valueMap[name] = reflect.ValueOf(name + " is nil,can't be reflected!")
 	}
+	//fmt.Println("PutInMirror: valueMap = ", valueMap, "\n")
 	//mirrorMap[name] = startReflect(v, name, "", 1)
 }
+
+/*func GetByKey_test(key string) {
+	v := valueMap[key]
+	fmt.Println("type of v:", v.Type(), v.Kind(), v)
+	fmt.Println("settability of v: ", v.CanSet())
+}*/
 
 func startReflect(v reflect.Value, selfName string, parentName string, level int) Mirror {
 	var m = Mirror{}
@@ -149,6 +167,7 @@ func reflectStruct(value reflect.Value, selfName string, parentName string, leve
 }
 
 func reflectAtom(value reflect.Value, selfName string, parentName string, level int) Mirror {
+	//fmt.Println("reflectAtom: [v, selfName, parentName, level] = ", value, selfName, parentName, level)
 	var m = Mirror{}
 	m.Key = createKey(selfName, parentName)
 	m.StaticType = value.Type().Name()
