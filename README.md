@@ -7,6 +7,7 @@ dir `browser`: browser client for showing reflect result. powered by [**dvajs**]
 
 **Features**
 
+* real-time reflect [track the real-time value of variables]
 * dynamic reflect [reflect on demand]
 * reflect EVERYTHING
 * visual display result
